@@ -1,299 +1,193 @@
-
 import 'package:flutter/material.dart';
-import 'package:reown_appkit/reown_appkit.dart';
 
 import '../services/blockchain_service.dart';
+import '../main.dart';
+import '../utils/etherscan.dart';
 
 class PeminjamanScreen extends StatefulWidget {
-  final ReownAppKitModal appKitModal;
-
-  const PeminjamanScreen({
-    super.key,
-    required this.appKitModal,
-  });
+  const PeminjamanScreen({super.key});
 
   @override
-  State<PeminjamanScreen> createState() =>
-      _PeminjamanScreenState();
+  State<PeminjamanScreen> createState() => _PeminjamanScreenState();
 }
 
 class _PeminjamanScreenState extends State<PeminjamanScreen> {
   final namaController = TextEditingController();
   final kodeController = TextEditingController();
 
-  late final BlockchainService service;
+  final service = BlockchainService();
 
   bool loading = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    service = BlockchainService(
-      appKitModal: widget.appKitModal,
-    );
-  }
 
   Future<void> simpanPeminjaman() async {
     if (namaController.text.trim().isEmpty ||
         kodeController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Semua kolom wajib diisi'),
+          content: Text('Nama dan kode alat wajib diisi'),
         ),
       );
       return;
     }
 
-    if (!widget.appKitModal.isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hubungkan MetaMask terlebih dahulu'),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      loading = true;
-    });
+    setState(() => loading = true);
 
     try {
-      final txHash = await service.tambahPeminjaman(
+      final hash = await service.tambahPeminjaman(
         namaAlat: namaController.text.trim(),
         kodeAlat: kodeController.text.trim(),
       );
 
-      if (!mounted) return;
+           if (!mounted) return;
+
+      Etherscan.tampilkanSnackBar(context, hash);
 
       namaController.clear();
       kodeController.clear();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Transaksi dikirim: $txHash',
-          ),
-          backgroundColor: const Color(0xFF167C52),
-          duration: const Duration(seconds: 6),
-        ),
-      );
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Gagal menyimpan: $e'),
-          backgroundColor: Colors.red.shade800,
-        ),
+        SnackBar(content: Text('Gagal: $e')),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
+      if (mounted) setState(() => loading = false);
     }
   }
 
-  Widget inputLabel(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
-          color: Colors.white,
+  @override
+  void dispose() {
+    namaController.dispose();
+    kodeController.dispose();
+    super.dispose();
+  }
+
+  Widget _formCard() {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.surfaceHigh, AppColors.surface],
         ),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.gold.withValues(alpha: 0.06),
+            blurRadius: 30,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.gold, AppColors.goldDark],
+                  ),
+                ),
+                child: const Icon(
+                  Icons.assignment_add,
+                  color: Color(0xFF1A1305),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Text(
+                  'Data Peminjaman Baru',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          TextField(
+            controller: namaController,
+            textInputAction: TextInputAction.next,
+            style: const TextStyle(color: AppColors.textPrimary),
+            decoration: const InputDecoration(
+              labelText: 'Nama Alat',
+              prefixIcon: Icon(
+                Icons.precision_manufacturing_outlined,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: kodeController,
+            textInputAction: TextInputAction.done,
+            style: const TextStyle(color: AppColors.textPrimary),
+            decoration: const InputDecoration(
+              labelText: 'Kode Alat',
+              prefixIcon: Icon(
+                Icons.qr_code_2_rounded,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 22),
+          FilledButton.icon(
+            onPressed: loading ? null : simpanPeminjaman,
+            icon: loading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: AppColors.gold,
+                    ),
+                  )
+                : const Icon(Icons.save_rounded),
+            label: Text(
+              loading ? 'Memproses...' : 'Simpan Peminjaman',
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final connected = widget.appKitModal.isConnected;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(18),
-      child: Column(
+  Widget _noteCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
-
-          const Text(
-            'Peminjaman Alat',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
+          Icon(
+            Icons.verified_user_outlined,
+            color: AppColors.gold.withValues(alpha: 0.9),
+            size: 22,
           ),
-
-          const SizedBox(height: 6),
-
-          const Text(
-            'Catat peminjaman alat ke blockchain',
-            style: TextStyle(
-              color: Colors.white60,
-            ),
-          ),
-
-          const SizedBox(height: 22),
-
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF174B9B),
-                  Color(0xFF102443),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.inventory_2_rounded,
-                  color: Colors.lightBlueAccent,
-                  size: 38,
-                ),
-                SizedBox(height: 15),
-                Text(
-                  'Form Peminjaman',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  'Masukkan informasi alat yang akan dipinjam. '
-                  'Wallet yang terhubung akan tercatat '
-                  'sebagai peminjam.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    height: 1.5,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  inputLabel('Nama Alat'),
-
-                  TextField(
-                    controller: namaController,
-                    decoration: const InputDecoration(
-                      hintText: 'Contoh: Sensor DHT22',
-                      prefixIcon: Icon(Icons.devices),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  inputLabel('Kode Alat'),
-
-                  TextField(
-                    controller: kodeController,
-                    textCapitalization:
-                        TextCapitalization.characters,
-                    decoration: const InputDecoration(
-                      hintText: 'Contoh: MHS002',
-                      prefixIcon: Icon(Icons.qr_code_2),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed:
-                          loading ? null : simpanPeminjaman,
-                      icon: loading
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.send_rounded),
-                      label: Text(
-                        loading
-                            ? 'Menunggu transaksi...'
-                            : 'Simpan Peminjaman',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: connected
-                  ? const Color(0xFF103B32)
-                  : const Color(0xFF42252B),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: connected
-                    ? Colors.greenAccent.withValues(alpha: 0.3)
-                    : Colors.redAccent.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  connected
-                      ? Icons.verified_user
-                      : Icons.warning_amber_rounded,
-                  color: connected
-                      ? Colors.greenAccent
-                      : Colors.orangeAccent,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    connected
-                        ? 'Wallet MetaMask terhubung'
-                        : 'Wallet belum terhubung. Hubungkan terlebih dahulu.',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
-          const Center(
+          const SizedBox(width: 12),
+          const Expanded(
             child: Text(
-              'LOGBOOK IoT • ETHEREUM SEPOLIA',
+              'Data dicatat sebagai transaksi blockchain sehingga transparan dan tidak dapat diubah.',
               style: TextStyle(
-                color: Colors.white38,
-                fontSize: 10,
-                letterSpacing: 1,
+                fontSize: 13,
+                height: 1.45,
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -303,10 +197,33 @@ class _PeminjamanScreenState extends State<PeminjamanScreen> {
   }
 
   @override
-  void dispose() {
-    namaController.dispose();
-    kodeController.dispose();
-    service.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        children: [
+          const Text(
+            'Peminjaman Alat',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.6,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Catat peminjaman alat laboratorium ke blockchain.',
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          _formCard(),
+          const SizedBox(height: 16),
+          _noteCard(),
+        ],
+      ),
+    );
   }
 }

@@ -6,7 +6,7 @@ class BlockchainConfig {
   static const int chainId = 11155111;
 
   static const String contractAddress =
-      '0x17808Ef4Defcbedd18a55cA9D0cdc8fa0BaCd95A';
+      '0xb89Bff51dEB10C090C4F0154478AFd062195225D';
 
   static const String abiPath =
       'assets/abi/LogbookIoT.json';

@@ -1,51 +1,32 @@
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:reown_appkit/reown_appkit.dart';
 
 import '../models/peminjaman.dart';
 import '../services/blockchain_service.dart';
+import '../utils/etherscan.dart';
 
 class RiwayatScreen extends StatefulWidget {
-  final ReownAppKitModal appKitModal;
-
-  const RiwayatScreen({
-    super.key,
-    required this.appKitModal,
-  });
+  const RiwayatScreen({super.key});
 
   @override
-  State<RiwayatScreen> createState() =>
-      _RiwayatScreenState();
+  State<RiwayatScreen> createState() => _RiwayatScreenState();
 }
 
 class _RiwayatScreenState extends State<RiwayatScreen> {
-  late final BlockchainService service;
+  final service = BlockchainService();
 
   List<Peminjaman> data = [];
-
   bool loading = true;
-  String? errorMessage;
+  int? prosesId; // id yang sedang dikembalikan
 
   @override
   void initState() {
     super.initState();
-
-    service = BlockchainService(
-      appKitModal: widget.appKitModal,
-    );
-
     refreshData();
   }
 
-  // AMBIL DATA BLOCKCHAIN
   Future<void> refreshData() async {
-    if (!mounted) return;
-
-    setState(() {
-      loading = true;
-      errorMessage = null;
-    });
+    setState(() => loading = true);
 
     try {
       final hasil = await service.ambilSemuaPeminjaman();
@@ -58,65 +39,111 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-
-      setState(() {
-        loading = false;
-        errorMessage = e.toString();
-      });
+      setState(() => loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengambil data: $e')),
+      );
     }
   }
 
-  // PENGEMBALIAN ALAT
   Future<void> kembalikan(int id) async {
-    if (!widget.appKitModal.isConnected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Hubungkan MetaMask terlebih dahulu',
-          ),
-        ),
-      );
-      return;
-    }
+    setState(() => prosesId = id);
 
     try {
-      final txHash = await service.kembalikanAlat(id);
+       final hash = await service.kembalikanAlat(id);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Transaksi pengembalian dikirim: $txHash',
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 6),
-        ),
-      );
+      Etherscan.tampilkanSnackBar(context, hash);
 
+      // beri waktu transaksi masuk blok, lalu muat ulang
+      await Future.delayed(const Duration(seconds: 5));
+
+      // beri waktu transaksi masuk blok, lalu muat ulang
+      await Future.delayed(const Duration(seconds: 5));
+      if (!mounted) return;
       await refreshData();
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Gagal mengembalikan alat: $e',
-          ),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Gagal: $e')),
       );
+    } finally {
+      if (mounted) setState(() => prosesId = null);
     }
   }
 
-  // FORMAT TANGGAL
-  String formatTanggal(DateTime tanggal) {
-    return DateFormat(
-      'dd-MM-yyyy HH:mm',
-    ).format(tanggal);
+  String tanggal(DateTime value) =>
+      DateFormat('dd-MM-yyyy HH:mm').format(value);
+
+  Widget _kartu(Peminjaman item) {
+    final sudahKembali = item.dikembalikan;
+    final sedangProses = prosesId == item.id;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.namaAlat,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    sudahKembali ? 'Kembali' : 'Dipinjam',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'ID: ${item.id}\n'
+              'Kode: ${item.kodeAlat}\n'
+              'Peminjam: ${item.peminjam}\n'
+              'Tanggal pinjam: ${tanggal(item.tanggalPinjam)}'
+              '${item.tanggalKembali != null ? '\nTanggal kembali: ${tanggal(item.tanggalKembali!)}' : ''}',
+              style: const TextStyle(height: 1.5),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: (sudahKembali || sedangProses)
+                    ? null
+                    : () => kembalikan(item.id),
+                icon: sedangProses
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2.4),
+                      )
+                    : const Icon(Icons.assignment_return),
+                label: Text(
+                  sedangProses
+                      ? 'Memproses...'
+                      : sudahKembali
+                          ? 'Sudah dikembalikan'
+                          : 'Kembalikan',
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  // TAMPILAN
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,172 +156,25 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
           ),
         ],
       ),
-
-      body: RefreshIndicator(
-        onRefresh: refreshData,
-        child: loading
-            ? ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 250),
-                  Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ],
-              )
-            : errorMessage != null
-                ? ListView(
-                    physics:
-                        const AlwaysScrollableScrollPhysics(),
-                    children: [
-                      const SizedBox(height: 120),
-                      const Icon(
-                        Icons.error_outline,
-                        size: 50,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 12),
-                      const Center(
-                        child: Text(
-                          'Gagal mengambil data blockchain',
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(
-                          errorMessage!,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Center(
-                        child: FilledButton(
-                          onPressed: refreshData,
-                          child: const Text('Coba Lagi'),
-                        ),
-                      ),
-                    ],
-                  )
-                : data.isEmpty
-                    ? ListView(
-                        physics:
-                            const AlwaysScrollableScrollPhysics(),
-                        children: const [
-                          SizedBox(height: 150),
-                          Icon(
-                            Icons.inventory_2_outlined,
-                            size: 55,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(height: 15),
-                          Center(
-                            child: Text(
-                              'Belum ada data peminjaman',
-                            ),
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
-                        physics:
-                            const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: data.length,
-                        itemBuilder: (context, index) {
-                          final item = data[index];
-
-                          return Card(
-                            color: Colors.white,
-                            margin: const EdgeInsets.only(
-                              bottom: 12,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.devices,
-                                        color: Colors.blue,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          item.namaAlat,
-                                          style: const TextStyle(
-                                            fontWeight:
-                                                FontWeight.bold,
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                      ),
-                                      Chip(
-                                        label: Text(
-                                          item.dikembalikan
-                                              ? 'Dikembalikan'
-                                              : 'Dipinjam',
-                                        ),
-                                        backgroundColor:
-                                            item.dikembalikan
-                                                ? Colors.green.shade100
-                                                : Colors.orange.shade100,
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 8),
-
-                                  Text('ID: ${item.id}'),
-
-                                  Text(
-                                    'Kode alat: ${item.kodeAlat}',
-                                  ),
-
-                                  Text(
-                                    'Peminjam: ${item.peminjam}',
-                                  ),
-
-                                  Text(
-                                    'Tanggal pinjam: '
-                                    '${formatTanggal(item.tanggalPinjam)}',
-                                  ),
-
-                                  if (item.tanggalKembali != null)
-                                    Text(
-                                      'Tanggal kembali: '
-                                      '${formatTanggal(item.tanggalKembali!)}',
-                                    ),
-
-                                  const SizedBox(height: 12),
-
-                                  if (!item.dikembalikan)
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: FilledButton.icon(
-                                        onPressed: () =>
-                                            kembalikan(item.id),
-                                        icon: const Icon(
-                                          Icons.assignment_return,
-                                        ),
-                                        label: const Text(
-                                          'Kembalikan Alat',
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: refreshData,
+              child: data.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 120),
+                        Center(child: Text('Belum ada peminjaman')),
+                      ],
+                    )
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: data.length,
+                      itemBuilder: (context, index) => _kartu(data[index]),
+                    ),
+            ),
     );
-  }
-
-  @override
-  void dispose() {
-    service.dispose();
-    super.dispose();
   }
 }

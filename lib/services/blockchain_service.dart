@@ -1,152 +1,47 @@
 
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:web3dart/web3dart.dart';
 import 'package:wallet/wallet.dart' show EthereumAddress;
-import 'package:reown_appkit/reown_appkit.dart';
 
 import '../config/blockchain_config.dart';
 import '../models/peminjaman.dart';
+import 'wallet_connect_service.dart';
 
 class BlockchainService {
-  final ReownAppKitModal? appKitModal;
+  Web3Client? _client;
+  DeployedContract? _contract;
 
-  late final Web3Client _client;
-  late DeployedContract _contract;
+  Future<void> initialize() async {
+    if (_contract != null) return;
 
-  bool _initialized = false;
-
-  BlockchainService({
-    this.appKitModal,
-  }) {
     _client = Web3Client(
       BlockchainConfig.rpcUrl,
       http.Client(),
     );
-  }
 
-  // ==================================
-  // INISIALISASI SMART CONTRACT
-  // ==================================
-
-  Future<void> initialize() async {
-    if (_initialized) return;
-
-    final abiJson = await rootBundle.loadString(
+    final abiString = await rootBundle.loadString(
       BlockchainConfig.abiPath,
     );
 
-    final abi = ContractAbi.fromJson(
-      abiJson,
-      'LogbookIoT',
-    );
+    final abi = jsonDecode(abiString);
 
     _contract = DeployedContract(
-      abi,
+      ContractAbi.fromJson(
+        jsonEncode(abi),
+        'LogbookIoT',
+      ),
       EthereumAddress.fromHex(
-        BlockchainConfig.contractAddress.trim(),
+        BlockchainConfig.contractAddress,
       ),
     );
-
-    _initialized = true;
   }
 
-  // ==================================
-  // MENGAMBIL ALAMAT WALLET
-  // ==================================
-
-  String getWalletAddress() {
-    final modal = appKitModal;
-
-    if (modal == null || !modal.isConnected) {
-      throw Exception(
-        'Silakan Connect Wallet MetaMask terlebih dahulu',
-      );
-    }
-
-    final session = modal.session;
-
-    if (session == null) {
-      throw Exception('Session wallet tidak ditemukan');
-    }
-
-    final address = session.getAddress('eip155');
-
-    if (address == null || address.isEmpty) {
-      throw Exception('Alamat wallet tidak ditemukan');
-    }
-
-    return address;
+  String _encode(List<int> bytes) {
+    return '0x${bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join()}';
   }
-
-  // ==================================
-  // JUMLAH PEMINJAMAN
-  // ==================================
-
-  Future<int> jumlahPeminjaman() async {
-    await initialize();
-
-    final function = _contract.function(
-      'jumlahPeminjaman',
-    );
-
-    final result = await _client.call(
-      contract: _contract,
-      function: function,
-      params: [],
-    );
-
-    return (result[0] as BigInt).toInt();
-  }
-
-  // ==================================
-  // DETAIL PEMINJAMAN
-  // ==================================
-
-  Future<Peminjaman> ambilPeminjaman(int id) async {
-    await initialize();
-
-    final function = _contract.function(
-      'ambilPeminjaman',
-    );
-
-    final result = await _client.call(
-      contract: _contract,
-      function: function,
-      params: [
-        BigInt.from(id),
-      ],
-    );
-
-    return Peminjaman.fromTuple(
-      result[0] as List<dynamic>,
-    );
-  }
-
-  // ==================================
-  // SEMUA DATA PEMINJAMAN
-  // ==================================
-
-  Future<List<Peminjaman>> ambilSemuaPeminjaman() async {
-    final jumlah = await jumlahPeminjaman();
-
-    final List<Peminjaman> daftar = [];
-
-    for (int id = 1; id <= jumlah; id++) {
-      final data = await ambilPeminjaman(id);
-      daftar.add(data);
-    }
-
-    return daftar;
-  }
-
-  Future<List<Peminjaman>> semuaPeminjaman() {
-    return ambilSemuaPeminjaman();
-  }
-
-  // ==================================
-  // TAMBAH PEMINJAMAN
-  // ==================================
 
   Future<String> tambahPeminjaman({
     required String namaAlat,
@@ -154,91 +49,79 @@ class BlockchainService {
   }) async {
     await initialize();
 
-    final modal = appKitModal;
-
-    if (modal == null || !modal.isConnected) {
-      throw Exception('Wallet belum terhubung');
-    }
-
-    final address = getWalletAddress();
-    final session = modal.session!;
-
-    final function = _contract.function(
+    final function = _contract!.function(
       'tambahPeminjaman',
     );
 
-    final parameters = [
+    final data = function.encodeCall([
       namaAlat,
       kodeAlat,
-    ];
+    ]);
 
-    final transaction = Transaction.callContract(
-      contract: _contract,
-      function: function,
-      parameters: parameters,
-      from: EthereumAddress.fromHex(address),
+    return WalletConnectService.instance.sendTransaction(
+      contractAddress: BlockchainConfig.contractAddress,
+      data: _encode(data),
     );
-
-    final result = await modal.requestWriteContract(
-      topic: session.topic,
-      chainId: session.chainId,
-      deployedContract: _contract,
-      functionName: 'tambahPeminjaman',
-      transaction: transaction,
-      parameters: parameters,
-    );
-
-    return result.toString();
   }
-
-  // ==================================
-  // KEMBALIKAN ALAT
-  // ==================================
 
   Future<String> kembalikanAlat(int id) async {
     await initialize();
 
-    final modal = appKitModal;
-
-    if (modal == null || !modal.isConnected) {
-      throw Exception('Wallet belum terhubung');
-    }
-
-    final address = getWalletAddress();
-    final session = modal.session!;
-
-    final function = _contract.function(
+    final function = _contract!.function(
       'kembalikanAlat',
     );
 
-    final parameters = [
+    final data = function.encodeCall([
       BigInt.from(id),
-    ];
+    ]);
 
-    final transaction = Transaction.callContract(
-      contract: _contract,
-      function: function,
-      parameters: parameters,
-      from: EthereumAddress.fromHex(address),
+    return WalletConnectService.instance.sendTransaction(
+      contractAddress: BlockchainConfig.contractAddress,
+      data: _encode(data),
     );
-
-    final result = await modal.requestWriteContract(
-      topic: session.topic,
-      chainId: session.chainId,
-      deployedContract: _contract,
-      functionName: 'kembalikanAlat',
-      transaction: transaction,
-      parameters: parameters,
-    );
-
-    return result.toString();
   }
 
-  // ==================================
-  // DISPOSE
-  // ==================================
+  Future<BigInt> getJumlahPeminjaman() async {
+    await initialize();
+
+    final result = await _client!.call(
+      contract: _contract!,
+      function: _contract!.function('jumlahPeminjaman'),
+      params: [],
+    );
+
+    return result.first as BigInt;
+  }
+
+  Future<Peminjaman> getPeminjaman(int id) async {
+    await initialize();
+
+    final result = await _client!.call(
+      contract: _contract!,
+      function: _contract!.function('ambilPeminjaman'),
+      params: [BigInt.from(id)],
+    );
+
+    return Peminjaman.fromTuple(
+      result.first as List<dynamic>,
+    );
+  }
+
+  Future<List<Peminjaman>> ambilSemuaPeminjaman() async {
+    final jumlah = await getJumlahPeminjaman();
+
+    final List<Peminjaman> hasil = [];
+
+    for (int i = 1; i <= jumlah.toInt(); i++) {
+      hasil.add(await getPeminjaman(i));
+    }
+
+    return hasil.reversed.toList();
+  }
 
   void dispose() {
-    _client.dispose();
+    _client?.dispose();
+    _client = null;
+    _contract = null;
   }
 }

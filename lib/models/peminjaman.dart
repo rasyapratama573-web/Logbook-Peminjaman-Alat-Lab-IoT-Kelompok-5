@@ -1,5 +1,4 @@
-
-class Peminjaman {
+﻿class Peminjaman {
   final int id;
   final String namaAlat;
   final String kodeAlat;

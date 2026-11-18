@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
-import 'package:reown_appkit/reown_appkit.dart';
 
+import 'main.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/peminjaman_screen.dart';
 import 'screens/riwayat_screen.dart';
+import 'services/wallet_connect_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,252 +16,232 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
 
-  late ReownAppKitModal appKitModal;
-
-  bool initialized = false;
-  bool initError = false;
-
-  static const Color bg = Color(0xFF080D18);
-  static const Color surface = Color(0xFF111A2B);
-  static const Color accent = Color(0xFF3987FF);
+  final pages = const [
+    DashboardScreen(),
+    PeminjamanScreen(),
+    RiwayatScreen(),
+  ];
 
   @override
   void initState() {
     super.initState();
-    initializeWallet();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await WalletConnectService.instance.initialize(context);
+      if (mounted) setState(() {});
+    });
   }
 
-  Future<void> initializeWallet() async {
+  Future<void> connectWallet() async {
     try {
-      appKitModal = ReownAppKitModal(
-        context: context,
-        projectId: 'e883b04321299397103cdc238c68a64c',
-        metadata: const PairingMetadata(
-          name: 'Logbook IoT',
-          description: 'Aplikasi Peminjaman Alat IoT',
-          url: 'https://reown.com/',
-          icons: ['https://reown.com/logo.png'],
-          redirect: Redirect(
-            native: 'logbook5iot://',
-          ),
-        ),
-      );
-
-      await appKitModal.init();
-
-      if (!mounted) return;
-
-      setState(() {
-        initialized = true;
-      });
+      await WalletConnectService.instance.connect(context);
+      if (mounted) setState(() {});
     } catch (e) {
-      debugPrint('Wallet error: $e');
-
       if (!mounted) return;
-
-      setState(() {
-        initError = true;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal menghubungkan wallet: $e')),
+      );
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: bg,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: accent,
-          brightness: Brightness.dark,
-          surface: surface,
+  String _shortAddress(String? address) {
+    if (address == null || address.length < 10) return address ?? '';
+    return '${address.substring(0, 6)}...${address.substring(address.length - 4)}';
+  }
+
+  Widget _buildLogo() {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.gold, AppColors.goldDark],
         ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: bg,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: false,
-        ),
-        cardTheme: CardThemeData(
-          color: surface,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(
-              color: Color(0xFF24334B),
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.gold.withValues(alpha: 0.35),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFF172338),
-          labelStyle: const TextStyle(
-            color: Colors.white70,
-          ),
-          hintStyle: const TextStyle(
-            color: Colors.white38,
-          ),
-          prefixIconColor: accent,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(
-              color: Color(0xFF293B56),
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(
-              color: Color(0xFF293B56),
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(
-              color: accent,
-              width: 1.5,
-            ),
-          ),
-        ),
-        navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: surface,
-          indicatorColor: accent.withValues(alpha: 0.2),
-          labelTextStyle: WidgetStateProperty.all(
-            const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            backgroundColor: accent,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            padding: const EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 20,
-            ),
-          ),
-        ),
+        ],
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Row(
-            children: [
-              Icon(
-                Icons.hub_rounded,
-                color: accent,
-                size: 27,
-              ),
-              SizedBox(width: 10),
-              Text(
-                'LOGBOOK IoT',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                  fontSize: 18,
-                ),
-              ),
-            ],
+      child: const Icon(
+        Icons.memory_rounded,
+        color: Color(0xFF1A1305),
+        size: 22,
+      ),
+    );
+  }
+
+  Widget _buildWalletPill(bool connected) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Material(
+        color: connected
+            ? AppColors.success.withValues(alpha: 0.10)
+            : AppColors.gold.withValues(alpha: 0.12),
+        shape: StadiumBorder(
+          side: BorderSide(
+            color: connected
+                ? AppColors.success.withValues(alpha: 0.45)
+                : AppColors.gold.withValues(alpha: 0.55),
           ),
-          actions: [
-            if (initialized)
-              AppKitModalAccountButton(
-                appKitModal: appKitModal,
-                context: context,
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: initError
-                    ? const Icon(
-                        Icons.error_outline,
-                        color: Colors.redAccent,
-                      )
-                    : const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                      ),
-              ),
-            const SizedBox(width: 8),
-          ],
         ),
-        body: Column(
-          children: [
-            if (initialized)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  16, 8, 16, 12,
-                ),
-                child: AppKitModalConnectButton(
-                  appKit: appKitModal,
-                  context: context,
-                ),
-              ),
-            Expanded(
-              child: !initialized
-                  ? Center(
-                      child: initError
-                          ? const Text(
-                              'Gagal menginisialisasi wallet',
-                            )
-                          : const CircularProgressIndicator(),
-                    )
-                  : IndexedStack(
-                      index: selectedIndex,
-                      children: [
-                        const DashboardScreen(),
-                        PeminjamanScreen(
-                          appKitModal: appKitModal,
-                        ),
-                        RiwayatScreen(
-                          appKitModal: appKitModal,
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: connectWallet,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (connected)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.success,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.success.withValues(alpha: 0.6),
+                          blurRadius: 6,
                         ),
                       ],
                     ),
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(
+                      Icons.account_balance_wallet_outlined,
+                      size: 16,
+                      color: AppColors.gold,
+                    ),
+                  ),
+                Text(
+                  connected
+                      ? _shortAddress(
+                          WalletConnectService.instance.walletAddress,
+                        )
+                      : 'Hubungkan',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                    color: connected ? AppColors.success : AppColors.gold,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              selectedIndex = index;
-            });
-          },
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.grid_view_outlined),
-              selectedIcon: Icon(Icons.grid_view_rounded),
-              label: 'Dashboard',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.add_box_outlined),
-              selectedIcon: Icon(Icons.add_box),
-              label: 'Peminjaman',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.receipt_long_outlined),
-              selectedIcon: Icon(Icons.receipt_long),
-              label: 'Riwayat',
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   @override
-  void dispose() {
-    if (initialized) {
-      appKitModal.dispose();
-    }
-    super.dispose();
+  Widget build(BuildContext context) {
+    final wallet = WalletConnectService.instance;
+    final connected = wallet.isConnected;
+
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 68,
+        titleSpacing: 20,
+        title: Row(
+          children: [
+            _buildLogo(),
+            const SizedBox(width: 12),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Logbook IoT',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 1),
+                Text(
+                  'Blockchain Lab Tracker',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.4,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [_buildWalletPill(connected)],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF111729), AppColors.background],
+          ),
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 280),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.02),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          ),
+          child: KeyedSubtree(
+            key: ValueKey<int>(selectedIndex),
+            child: pages[selectedIndex],
+          ),
+        ),
+      ),
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.border)),
+        ),
+        child: NavigationBar(
+          selectedIndex: selectedIndex,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          onDestinationSelected: (index) {
+            setState(() => selectedIndex = index);
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.space_dashboard_outlined),
+              selectedIcon: Icon(Icons.space_dashboard_rounded),
+              label: 'Dashboard',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.assignment_outlined),
+              selectedIcon: Icon(Icons.assignment_rounded),
+              label: 'Peminjaman',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.history_rounded),
+              selectedIcon: Icon(Icons.history_toggle_off_rounded),
+              label: 'Riwayat',
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
