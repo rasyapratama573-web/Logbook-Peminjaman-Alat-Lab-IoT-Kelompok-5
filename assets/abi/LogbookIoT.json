@@ -1,170 +1,170 @@
 [
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "peminjam",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "waktuKembali",
-        "type": "uint256"
-      }
-    ],
-    "name": "AlatDikembalikan",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "peminjam",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "namaAlat",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "kodeAlat",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "waktuPinjam",
-        "type": "uint256"
-      }
-    ],
-    "name": "PeminjamanBaru",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
-    ],
-    "name": "ambilPeminjaman",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "namaAlat",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "kodeAlat",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "waktuPinjam",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "waktuKembali",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "dikembalikan",
-            "type": "bool"
-          },
-          {
-            "internalType": "address",
-            "name": "peminjam",
-            "type": "address"
-          }
-        ],
-        "internalType": "struct LogbookIoT.Peminjaman",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "jumlahPeminjaman",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      }
-    ],
-    "name": "kembalikanAlat",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_namaAlat",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_kodeAlat",
-        "type": "string"
-      }
-    ],
-    "name": "tambahPeminjaman",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "peminjam",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "waktuKembali",
+				"type": "uint256"
+			}
+		],
+		"name": "AlatDikembalikan",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_id",
+				"type": "uint256"
+			}
+		],
+		"name": "kembalikanAlat",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "peminjam",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "namaAlat",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "kodeAlat",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "waktuPinjam",
+				"type": "uint256"
+			}
+		],
+		"name": "PeminjamanBaru",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_namaAlat",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_kodeAlat",
+				"type": "string"
+			}
+		],
+		"name": "tambahPeminjaman",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_id",
+				"type": "uint256"
+			}
+		],
+		"name": "ambilPeminjaman",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "namaAlat",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "kodeAlat",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "waktuPinjam",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "waktuKembali",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "dikembalikan",
+						"type": "bool"
+					},
+					{
+						"internalType": "address",
+						"name": "peminjam",
+						"type": "address"
+					}
+				],
+				"internalType": "struct LogbookIoT.Peminjaman",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "jumlahPeminjaman",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
 ]
