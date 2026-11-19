@@ -1,386 +1,286 @@
-Logbook5 IoT – Aplikasi Flutter Terhubung Blockchain
+# Logbook5 IoT – Aplikasi Flutter Terhubung Blockchain
 
-Aplikasi pencatatan dan pengelolaan data peminjaman berbasis Flutter yang terintegrasi dengan teknologi Blockchain menggunakan Smart Contract pada jaringan Ethereum Sepolia Testnet.
+Aplikasi pencatatan dan pengelolaan peminjaman alat laboratorium berbasis **Flutter**, yang terhubung dengan **Smart Contract Ethereum** pada jaringan **Sepolia Testnet**.
 
-Project ini dibuat untuk memenuhi tugas proyek Aplikasi Flutter Terhubung Blockchain.
+Proyek ini dibuat untuk memenuhi tugas mata kuliah **Pemrograman Mobile** oleh **Kelompok 5**.
 
----
+## 1. Deskripsi Proyek
 
-1. Deskripsi Project
+**Logbook5 IoT** membantu mencatat peminjaman dan pengembalian alat secara digital. Integrasi blockchain memungkinkan transaksi yang dikirim ke jaringan diperiksa melalui blockchain explorer.
 
-Logbook5 IoT merupakan aplikasi mobile yang digunakan untuk membantu proses pencatatan dan pengelolaan data peminjaman alat secara digital.
+### Fitur aplikasi
 
-Aplikasi dikembangkan menggunakan Flutter dan diintegrasikan dengan teknologi blockchain Ethereum agar pencatatan data peminjaman dapat dilakukan secara transparan dan transaksi dapat diverifikasi melalui blockchain explorer.
-
-Fitur Aplikasi
-
-- Menampilkan dashboard aplikasi.
-- Melakukan pencatatan data peminjaman alat.
-- Menambahkan data peminjaman ke Smart Contract.
-- Menampilkan riwayat peminjaman.
-- Mengembalikan alat yang dipinjam.
-- Integrasi aplikasi dengan jaringan Ethereum Sepolia.
+- Dashboard aplikasi.
+- Pencatatan data peminjaman alat.
+- Pengiriman data peminjaman ke Smart Contract.
+- Riwayat peminjaman.
+- Pengembalian alat yang dipinjam.
+- Integrasi Ethereum Sepolia Testnet.
 - Koneksi wallet menggunakan Reown AppKit.
-- Interaksi dengan Smart Contract menggunakan web3dart.
-- Melihat transaksi melalui Etherscan.
+- Interaksi Smart Contract menggunakan `web3dart`.
+- Pemeriksaan transaksi melalui Etherscan.
 
----
+## 2. Teknologi yang Digunakan
 
-2. Teknologi yang Digunakan
+| Teknologi | Kegunaan |
+| --- | --- |
+| Flutter | Framework aplikasi mobile |
+| Dart | Bahasa pemrograman aplikasi |
+| Solidity | Bahasa pemrograman Smart Contract |
+| Ethereum Sepolia | Jaringan blockchain untuk pengujian |
+| web3dart | Interaksi aplikasi dengan Ethereum |
+| Reown AppKit | Koneksi wallet |
+| Etherscan | Pemeriksaan transaksi blockchain |
+| Android Studio | Android SDK dan build tools |
+| Visual Studio Code | Editor kode |
+| Gradle | Sistem build Android |
+| GitHub | Penyimpanan kode sumber |
 
-Teknologi| Keterangan
-Flutter| Framework pengembangan aplikasi mobile
-Dart| Bahasa pemrograman aplikasi
-Solidity| Bahasa pemrograman Smart Contract
-Ethereum| Jaringan blockchain
-Sepolia Testnet| Jaringan pengujian blockchain
-web3dart| Library interaksi dengan Ethereum
-Reown AppKit| Integrasi koneksi wallet
-Wallet| Pengelolaan koneksi dan transaksi wallet
-Etherscan| Blockchain explorer
-Android Studio| Android SDK dan build tools
-Visual Studio Code| Code editor
-Gradle| Sistem build aplikasi Android
+## 3. Struktur Proyek
 
----
+Struktur berikut menggambarkan **bagian utama** proyek. Folder platform seperti `android`, `ios`, `web`, `windows`, `linux`, dan `macos` juga tersedia di repository.
 
-3. Struktur Project
-
+```text
 logbook5_iot/
-│
 ├── lib/
-│   │
 │   ├── config/
 │   │   └── blockchain_config.dart
-│   │
 │   ├── models/
 │   │   └── peminjaman.dart
-│   │
 │   ├── screens/
 │   │   ├── dashboard_screen.dart
 │   │   ├── peminjaman_screen.dart
 │   │   └── riwayat_screen.dart
-│   │
 │   ├── services/
 │   │   ├── blockchain_service.dart
 │   │   └── wallet_connect_service.dart
-│   │
 │   ├── theme/
 │   │   └── app_theme.dart
-│   │
 │   ├── utils/
 │   │   └── etherscan.dart
-│   │
 │   ├── widgets/
 │   │   └── menu_card.dart
-│   │
 │   ├── main_screen.dart
 │   └── main.dart
-│
 ├── assets/
 │   └── abi/
 │       └── LogbookIoT.json
-│
+├── smart_contract/
+│   └── Remix Web3 - Smart Contract Development.html
+├── android/
+├── ios/
+├── web/
+├── windows/
+├── linux/
+├── macos/
 ├── pubspec.yaml
 └── README.md
+```
 
-Penjelasan Folder
+### Penjelasan folder
 
-Folder/File| Fungsi
-"config/"| Menyimpan konfigurasi jaringan blockchain dan Smart Contract.
-"models/"| Menyimpan struktur model data peminjaman.
-"screens/"| Menyimpan halaman dashboard, peminjaman, dan riwayat.
-"services/"| Mengelola koneksi wallet dan komunikasi dengan blockchain.
-"theme/"| Mengatur tema dan tampilan aplikasi.
-"utils/"| Menyimpan fungsi pendukung, termasuk akses Etherscan.
-"widgets/"| Menyimpan komponen UI yang dapat digunakan kembali.
-"main_screen.dart"| Mengatur tampilan utama aplikasi.
-"main.dart"| Entry point aplikasi Flutter.
-"assets/abi/"| Menyimpan ABI Smart Contract.
-"pubspec.yaml"| Mengatur dependency dan konfigurasi project Flutter.
+| Folder / File | Fungsi |
+| --- | --- |
+| `lib/config/` | Konfigurasi blockchain dan Smart Contract |
+| `lib/models/` | Model data peminjaman |
+| `lib/screens/` | Halaman dashboard, peminjaman, dan riwayat |
+| `lib/services/` | Koneksi wallet dan komunikasi blockchain |
+| `lib/theme/` | Pengaturan tampilan aplikasi |
+| `lib/utils/` | Fungsi pendukung, termasuk Etherscan |
+| `lib/widgets/` | Komponen antarmuka yang digunakan ulang |
+| `lib/main.dart` | Titik awal aplikasi Flutter |
+| `lib/main_screen.dart` | Tampilan utama |
+| `assets/abi/` | ABI Smart Contract |
+| `smart_contract/` | File pendukung pengembangan Smart Contract |
+| `pubspec.yaml` | Dependensi dan konfigurasi Flutter |
 
----
+> **Catatan:** File `.html` pada folder `smart_contract` bukan pengganti file sumber Solidity `.sol`. Nama dan lokasi file `.sol` masih perlu dikonfirmasi kepada anggota kelompok.
 
-4. Konfigurasi Blockchain
+## 4. Konfigurasi Blockchain
 
-Aplikasi menggunakan jaringan Ethereum Sepolia Testnet untuk melakukan interaksi dengan Smart Contract.
+Konfigurasi aplikasi berada pada `lib/config/blockchain_config.dart`.
 
-Konfigurasi blockchain terdapat pada file:
+| Konfigurasi | Nilai |
+| --- | --- |
+| Network | Ethereum Sepolia Testnet |
+| Chain ID | `11155111` |
+| RPC URL | `https://ethereum-sepolia-rpc.publicnode.com` |
+| Smart Contract | `LogbookIoT` |
+| Contract Address | `0xb89Bff51dEB10C090C4F0154478AFd062195225D` |
+| ABI | `assets/abi/LogbookIoT.json` |
 
-"lib/config/blockchain_config.dart"
+[Lihat alamat kontrak di Sepolia Etherscan](https://sepolia.etherscan.io/address/0xb89Bff51dEB10C090C4F0154478AFd062195225D)
 
-Detail Konfigurasi
+## 5. Smart Contract
 
-Konfigurasi| Nilai
-Blockchain Network| Ethereum Sepolia Testnet
-Chain ID| "11155111"
-RPC URL| "https://ethereum-sepolia-rpc.publicnode.com"
-Smart Contract| "LogbookIoT"
-Contract Address| "0xb89Bff51dEB10C090C4F0154478AFd062195225D"
-ABI Path| "assets/abi/LogbookIoT.json"
+Smart Contract **LogbookIoT** digunakan untuk mengelola data peminjaman alat pada blockchain.
 
-Smart Contract Address
+| Fungsi | Keterangan |
+| --- | --- |
+| `tambahPeminjaman` | Menambahkan data peminjaman |
+| `kembalikanAlat` | Mencatat pengembalian alat |
+| `jumlahPeminjaman` | Mengambil jumlah catatan peminjaman |
+| `ambilPeminjaman` | Mengambil detail peminjaman berdasarkan ID |
 
-0xb89Bff51dEB10C090C4F0154478AFd062195225D
+**Informasi tambahan:**
 
-RPC URL
+- File ABI: `assets/abi/LogbookIoT.json`
+- File Solidity `.sol`: belum dikonfirmasi.
+- Versi compiler Solidity: belum dikonfirmasi.
 
-https://ethereum-sepolia-rpc.publicnode.com
+**Referensi:** [Remix IDE](https://remix.ethereum.org/) · [Dokumentasi Solidity](https://docs.soliditylang.org/) · [Dokumentasi Ethereum](https://ethereum.org/en/developers/docs/)
 
-Chain ID
+## 6. Integrasi Wallet
 
-11155111
+Aplikasi menggunakan **Reown AppKit** untuk menghubungkan wallet. Pengguna dapat memberi persetujuan saat mengirim transaksi peminjaman atau pengembalian.
 
----
+Alur umumnya:
 
-5. Smart Contract
+1. Hubungkan wallet ke aplikasi.
+2. Pastikan wallet menggunakan jaringan Sepolia.
+3. Pilih tindakan peminjaman atau pengembalian.
+4. Setujui transaksi melalui wallet.
+5. Periksa status transaksi di Etherscan.
 
-Smart Contract digunakan untuk mengelola pencatatan data peminjaman pada jaringan Ethereum Sepolia.
+**Keamanan:** Jangan memasukkan private key, seed phrase, atau kata sandi wallet ke repository publik.
 
-Nama Smart Contract:
+Referensi: [Reown AppKit](https://docs.reown.com/appkit/flutter/core/installation) · [web3dart](https://pub.dev/packages/web3dart)
 
-"LogbookIoT"
+## 7. Dependensi dan Package
 
-File ABI yang digunakan aplikasi:
+Dependensi dikelola lewat `pubspec.yaml`. Versi berikut mengikuti dokumentasi proyek yang diberikan kelompok; untuk versi yang terpasang, periksa `pubspec.yaml` dan `pubspec.lock`.
 
-"assets/abi/LogbookIoT.json"
+| Package | Versi pada dokumentasi | Kegunaan |
+| --- | --- | --- |
+| `web3dart` | `3.0.3` | Interaksi dengan Ethereum |
+| `http` | `^1.6.0` | Komunikasi melalui HTTP/RPC |
+| `intl` | `^0.20.3` | Format tanggal dan angka |
+| `reown_appkit` | `^1.9.0` | Koneksi wallet |
+| `wallet` | `^0.0.18` | Utilitas wallet |
+| `url_launcher` | `^6.3.3` | Membuka tautan eksternal |
+| `cupertino_icons` | `^1.0.8` | Ikon |
+| `material_ui` | `^1.1.0` | Komponen antarmuka |
 
-Fungsi Smart Contract yang Dipanggil Aplikasi
+Perintah yang dapat digunakan:
 
-Fungsi| Keterangan
-"tambahPeminjaman"| Menambahkan data peminjaman alat.
-"kembalikanAlat"| Mengubah status pengembalian alat.
-"jumlahPeminjaman"| Mengambil jumlah data peminjaman.
-"ambilPeminjaman"| Mengambil detail data peminjaman berdasarkan ID.
-
-Referensi Smart Contract
-
-- Remix IDE: https://remix.ethereum.org/
-- Solidity Documentation: https://docs.soliditylang.org/
-- Ethereum Developer Documentation: https://ethereum.org/en/developers/docs/
-
-Informasi tambahan:
-
-- Nama file Solidity: [ISI NAMA FILE .sol]
-- Compiler Version: [ISI VERSI SOLIDITY]
-- Contract Address: "0xb89Bff51dEB10C090C4F0154478AFd062195225D"
-
----
-
-6. Integrasi Wallet
-
-Aplikasi menggunakan Reown AppKit untuk mendukung koneksi wallet dan interaksi pengguna dengan jaringan blockchain.
-
-Wallet digunakan untuk melakukan persetujuan transaksi ketika pengguna menambahkan data peminjaman atau mengembalikan alat.
-
-Referensi
-
-- Reown AppKit: https://docs.reown.com/appkit/flutter/core/installation
-- Ethereum Wallet: https://ethereum.org/en/wallets/
-- web3dart: https://pub.dev/packages/web3dart
-
-Catatan keamanan:
-
-Jangan pernah membagikan atau mengunggah private key, seed phrase, maupun informasi rahasia wallet ke repository GitHub.
-
----
-
-7. Dependency dan Package
-
-Dependency aplikasi dikelola menggunakan file "pubspec.yaml".
-
-Beberapa package yang digunakan:
-
-Package| Versi| Fungsi
-"web3dart"| 3.0.3| Interaksi dengan Smart Contract Ethereum
-"http"| ^1.6.0| Komunikasi HTTP dengan RPC
-"intl"| ^0.20.3| Format tanggal dan angka
-"reown_appkit"| ^1.9.0| Integrasi wallet
-"wallet"| ^0.0.18| Dukungan fungsi wallet
-"url_launcher"| ^6.3.3| Membuka URL eksternal
-"cupertino_icons"| ^1.0.8| Ikon aplikasi
-"material_ui"| ^1.1.0| Komponen UI
-
-Untuk mengunduh dependency:
-
+```bash
 flutter pub get
-
-Untuk melihat dependency:
-
 flutter pub deps
-
-Untuk memeriksa pembaruan package:
-
 flutter pub outdated
+```
 
----
+## 8. Persyaratan Instalasi
 
-8. Persyaratan Instalasi
+Siapkan Flutter SDK, Dart SDK, Android Studio/Android SDK, VS Code, Git, perangkat Android atau emulator, dan koneksi internet.
 
-Sebelum menjalankan aplikasi, pastikan perangkat pengembangan sudah memiliki:
+| Perangkat lunak | Tautan |
+| --- | --- |
+| Flutter | https://docs.flutter.dev/get-started/install |
+| Dart | https://dart.dev/get-dart |
+| Android Studio | https://developer.android.com/studio |
+| VS Code | https://code.visualstudio.com/ |
+| Git | https://git-scm.com/downloads |
 
-- Flutter SDK
-- Dart SDK
-- Android Studio
-- Android SDK
-- Visual Studio Code
-- Git
-- Smartphone Android atau emulator
-- Koneksi internet
+## 9. Cara Menjalankan Proyek
 
-Referensi Instalasi
+### A. Clone repository
 
-Tools| Link
-Flutter| https://docs.flutter.dev/get-started/install
-Dart| https://dart.dev/get-dart
-Android Studio| https://developer.android.com/studio
-Visual Studio Code| https://code.visualstudio.com/
-Git| https://git-scm.com/downloads
+```bash
+git clone https://github.com/rasyapratama573-web/Logbook-Peminjaman-Alat-Lab-IoT-Kelompok-5.git
+cd Logbook-Peminjaman-Alat-Lab-IoT-Kelompok-5
+```
 
----
+### B. Instal dependensi
 
-9. Cara Menjalankan Project
-
-A. Clone Repository
-
-git clone [LINK_REPOSITORY_GITHUB]
-
-Masuk ke direktori project:
-
-cd logbook5_iot
-
-B. Install Dependencies
-
+```bash
 flutter pub get
+```
 
-C. Periksa Konfigurasi Flutter
+### C. Periksa Flutter dan perangkat
 
+```bash
 flutter doctor
-
-Pastikan Flutter SDK dan Android SDK sudah terpasang dengan benar.
-
-D. Hubungkan Perangkat Android
-
-Aktifkan USB Debugging pada smartphone Android.
-
-Periksa perangkat yang terhubung:
-
 flutter devices
+```
 
-E. Jalankan Aplikasi
+Aktifkan **USB Debugging** apabila menggunakan smartphone Android.
 
+### D. Jalankan aplikasi
+
+```bash
 flutter run
+```
 
-F. Build APK
+### E. Build APK release
 
-Untuk membuat file APK:
-
+```bash
 flutter build apk --release
+```
 
-File APK dapat ditemukan pada:
+Hasil build biasanya terdapat di:
 
+```text
 build/app/outputs/flutter-apk/app-release.apk
+```
 
----
+**APK yang sudah tersedia di GitHub Releases merupakan `app-debug.apk` untuk pengujian**, bukan bukti bahwa build release sudah berhasil.
 
-10. Verifikasi Transaksi Blockchain
+[Unduh APK dari GitHub Releases](https://github.com/rasyapratama573-web/Logbook-Peminjaman-Alat-Lab-IoT-Kelompok-5/releases/tag/v1.0.0)
 
-Transaksi yang dilakukan melalui aplikasi dapat diperiksa menggunakan Etherscan pada jaringan Ethereum Sepolia.
+## 10. Verifikasi Transaksi Blockchain
 
-Link Smart Contract
+Buka [Sepolia Etherscan](https://sepolia.etherscan.io/), kemudian masukkan **transaction hash** untuk melihat status, alamat pengirim, alamat tujuan, nomor blok, gas fee, dan waktu transaksi.
 
-https://sepolia.etherscan.io/address/0xb89Bff51dEB10C090C4F0154478AFd062195225D
+[Alamat Smart Contract di Sepolia Etherscan](https://sepolia.etherscan.io/address/0xb89Bff51dEB10C090C4F0154478AFd062195225D)
 
-Link Blockchain Explorer
+> Transaksi yang baru dikirim belum tentu langsung berhasil. Pastikan transaksi sudah terkonfirmasi dan statusnya sukses.
 
-- Ethereum Mainnet: https://etherscan.io/
-- Ethereum Sepolia: https://sepolia.etherscan.io/
+## 11. Troubleshooting
 
-Untuk memeriksa transaksi, masukkan Transaction Hash yang diperoleh setelah transaksi dikirim melalui wallet.
+### Masalah dependensi
 
-Informasi yang dapat diperiksa meliputi:
-
-- Transaction Hash.
-- Status transaksi.
-- Alamat pengirim.
-- Alamat tujuan Smart Contract.
-- Block Number.
-- Gas Fee.
-- Timestamp transaksi.
-
----
-
-11. Troubleshooting
-
-Error Dependencies
-
-Jalankan:
-
+```bash
 flutter clean
 flutter pub get
+```
 
-Error Gradle
+### Masalah Gradle atau Android SDK
 
-Periksa konfigurasi Android Gradle Plugin, Kotlin, Gradle, dan Android SDK agar kompatibel dengan versi Flutter yang digunakan.
+Periksa hasil `flutter doctor`, versi Android SDK, Kotlin, dan Gradle. Setelah konfigurasi diperbaiki, coba:
 
-Kemudian jalankan:
-
+```bash
 flutter clean
 flutter pub get
 flutter run
+```
 
-Error Android SDK
+### Masalah koneksi blockchain atau wallet
 
-Jalankan:
+Periksa koneksi internet, RPC URL, Chain ID, Contract Address, ABI, jaringan wallet, serta ketersediaan Sepolia ETH untuk biaya gas testnet.
 
-flutter doctor
+## 12. Link Proyek
 
-Pastikan Android SDK dan Android SDK Command-line Tools sudah terpasang.
+| Keterangan | Tautan |
+| --- | --- |
+| Repository GitHub | [Logbook Peminjaman Alat Lab IoT – Kelompok 5](https://github.com/rasyapratama573-web/Logbook-Peminjaman-Alat-Lab-IoT-Kelompok-5) |
+| APK (debug) | [GitHub Release v1.0.0](https://github.com/rasyapratama573-web/Logbook-Peminjaman-Alat-Lab-IoT-Kelompok-5/releases/tag/v1.0.0) |
+| Smart Contract | [Sepolia Etherscan](https://sepolia.etherscan.io/address/0xb89Bff51dEB10C090C4F0154478AFd062195225D) |
 
-Error Koneksi Blockchain
+## 13. Identitas Pengembang
 
-Periksa kembali:
-
-- Koneksi internet.
-- RPC URL.
-- Chain ID.
-- Contract Address.
-- File ABI.
-- Jaringan wallet yang digunakan.
-
-Error Wallet
-
-Pastikan wallet sudah terhubung dan menggunakan jaringan Ethereum Sepolia Testnet.
-
-Pastikan juga wallet memiliki Sepolia ETH untuk membayar biaya transaksi pada jaringan testnet.
-
----
-
-12. Repository Project
-
-Link GitHub:
-
-[ISI LINK REPOSITORY GITHUB]
-
-Repository ini berisi source code aplikasi Flutter, konfigurasi blockchain, file ABI Smart Contract, serta file pendukung lainnya.
+| Keterangan | Identitas |
+| --- | --- |
+| Nama Proyek | Logbook5 IoT – Aplikasi Flutter Terhubung Blockchain |
+| Kelompok | Kelompok 5 |
+| Anggota 1 | Muhammad Ezra Fadillah |
+| Anggota 2 | Rasya Adzie Pratama |
+| Anggota 3 | Jawhariyatu Ummul Immama |
+| Anggota 4 | Deandy Jovadhan Diraja K |
+| Anggota 5 | Marvin Dimas Awang |
+| Mata Kuliah | Pemrograman Mobile |
+| Dosen Pengampu | Fara Triadi |
 
 ---
 
-13. Identitas Pengembang
-
-Keterangan| Identitas
-Nama Project| Logbook5 IoT
-Nama Kelompok| [KELOMPOK 5]
-Anggota 1| [Muhammad Ezra Fadillah]
-Anggota 2| [Rasya Adzie Pratama]
-Anggota 3| [Jawhariyatu Ummul Immama]
-Anggota 4| [Deandy Jovadhan Diraja K]
-Anggota 5| [Marvin Dimas Awang]
-Mata Kuliah| [Pemrograman Mobile]
-Dosen Pengampu| [Fara Triadi]
-
----
-
-Logbook5 IoT – Aplikasi Flutter Terhubung Blockchain
-
-Dikembangkan untuk memenuhi tugas proyek integrasi aplikasi mobile Flutter dengan teknologi Blockchain menggunakan Ethereum Smart Contract.
+**Logbook5 IoT — Kelompok 5**  
+Proyek integrasi aplikasi mobile Flutter dengan Smart Contract Ethereum pada Sepolia Testnet.
