@@ -1,4 +1,5 @@
-# logbook5_iot
+# Logbook peminjaman alat Lab IoT
+Kelompok 5
 
 A new Flutter project.
 
