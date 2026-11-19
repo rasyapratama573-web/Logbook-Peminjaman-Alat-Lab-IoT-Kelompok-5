@@ -274,7 +274,7 @@ Periksa koneksi internet, RPC URL, Chain ID, Contract Address, ABI, jaringan wal
 | Kelompok | Kelompok 5 |
 | Anggota 1 | Muhammad Ezra Fadillah |
 | Anggota 2 | Rasya Adzie Pratama |
-| Anggota 3 | Jawhariyatu Ummul Immama |
+| Anggota 3 | Jawhariyatul Ummul Immamah |
 | Anggota 4 | Deandy Jovadhan Diraja K |
 | Anggota 5 | Marvin Dimas Awang |
 | Mata Kuliah | Pemrograman Mobile |
